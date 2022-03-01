@@ -1,0 +1,37 @@
+set search_path "xxx  \                                             # 合成時要用到的所有 library 所放置的檔案路徑
+                 xxx  \
+                 $search_path"
+
+set target_library "xxx.db \                                        # 合成時會用到的 library (standard cell technology library)
+                    xxx.db \
+                   "
+
+set link_library " * $target_library \                              # 合成前要參考的 library (所有 library !!!)
+                    xxx.db           \                              # 設計中可能會使用 Macro library (IP/DW/SRAM/PAD)
+                    dw_foundation.sldb"                             # 從link library中尋找並連接起來
+# 路徑面前加 * 號表示開一塊單獨的內存空間給DC自己使用,然後先搜尋內存中已有的庫,然後再搜尋 link_library 指定的其他庫
+# DC 搜尋的庫為 search_path 指定的目錄 (e.g.之前合成讀入了庫a,庫a存到內存中,下次可以直接找到,找不到時就會從 link library 中找）
+
+set symbol_library "xxx.sdb"                                        # 合成後用來表示結果外觀的 library
+set synthetic_library "dw_foundation.sldb"                          # 合成時要把 RTL map 到電路的 library
+
+set suppress_errors [concat $suppress_errors "UID-401"]             # 當對於 port 設定 driving cell 的時候
+                                                                    # 會對於該 port 的 timing 估計造成影響
+                                                                    # 因此DC預設會對於這樣的指令顯示錯誤
+                                                                    # 在這裡將設定將這個錯誤忽略，讓合成流程更順暢
+
+set command_log_file "./command.log"                                # 設定 log 檔儲存的地方
+set view_command_log_file "./view_command.log"                      # 設定 log 檔儲存的地方
+
+set hdlin_translate_off_skip_text "TRUE"                            # 避免對於 translate off block 中的 code 做檢查
+set edifout_netlist_only "TRUE"                                     # 輸出 netlist 時,以 EDIF 格式輸出, 該格式用於不同 EDA tool 之間的交流規範
+set verilogout_no_tri true                                          # 把輸出的 netlist 中,tri-state 的腳位改用 wire 宣告
+set plot_command {lpr -Plp}
+
+set hdlin_enable_presto_for_vhdl "TRUE"                            
+set sh_enable_line_editing true                                     # 開啟自動補字 
+set sh_line_editing_mode emacs                                      # 設定文字編輯器
+history keep 100                                                    # 要保存的歷史指令數
+alias h history                                                     # 指定 h 為 history
+
+set hdlin_ff_always_sync_set_reset "TRUE"                           # 設定 FF reset 為 synchronous  (avoid mixing logics with reset)
